@@ -4,7 +4,8 @@ var APIKey = "a836acbd536c6ec3b05d3d1fcc35d97f";
 
 // WHEN I search for a city
 // search for a city and store in local storage
-$("#search-city").on("click", function () {
+$("#search-city").on("click", function (event) {
+  event.preventDefault();
   // get value of city input
   var city = $("#city-input").val();
 
@@ -42,16 +43,19 @@ $("#search-city").on("click", function () {
     var cityItem = $("<li>");
     cityItem.addClass("list-group-item");
     cityItem.text(response.name);
+    cityItem.attr("lat", response.coord.lat);
+    cityItem.attr("lon", response.coord.lon);
     $("#city-list").append(cityItem);
+
     console.log(cities);
 
     //render city info after clicking search button
-    renderCityInfo(city, lat, lon);
+    renderCityInfo(lat, lon);
   });
 });
 
 // WHEN I view current weather conditions for that city
-function renderCityInfo(city, lat, lon) {
+function renderCityInfo(lat, lon) {
   var queryURL2 =
     "https://api.openweathermap.org/data/2.5/onecall?lat=" +
     lat +
@@ -91,5 +95,52 @@ function renderCityInfo(city, lat, lon) {
       uviSpan.css("color", "white");
     }
     $("#uv-index").append(uviSpan);
+
+    // render 5-Day Forecast
+    renderForecast(response);
+    // $("#forecast") ? renderForecast(response) : $("#forecast").html("");
+  });
+}
+
+function renderForecast(response) {
+  // Render 5-day forecast
+  // var n = 5;
+  var days = response.daily;
+  days.slice(1, 6).map((day) => {
+    var dayCard = $("<div>");
+    dayCard.addClass("card col daycard");
+    // dayCard.css("width", "18rem");
+    dayCard.css("background-color", "lightblue");
+    dayCard.css("margin-right", "5px");
+    dayCard.css("font-size", "15px");
+
+    var dayCardBody = $("<div>");
+    dayCardBody.addClass("card-body");
+    dayCard.append(dayCardBody);
+
+    var dayCardName = $("<h6>");
+    dayCardName.addClass("card-title");
+    console.log(day.dt);
+    var datestamp = moment.unix(day.dt);
+    var forecastDate = datestamp.format("L");
+    console.log(forecastDate);
+    dayCardName.text(forecastDate);
+    dayCardBody.append(dayCardName);
+
+    var weatherIcon = $("<img>");
+    var iconCode = day.weather[0].icon;
+    var iconUrl = "http://openweathermap.org/img/wn/" + iconCode + ".png";
+    weatherIcon.attr("src", iconUrl);
+    dayCardBody.append(weatherIcon);
+
+    var dayTemp = $("<p>");
+    dayTemp.text(`Temp: ${day.temp.max} \xB0F`);
+    dayCardBody.append(dayTemp);
+
+    var dayHumidity = $("<p>");
+    dayHumidity.text(`Humidity: ${day.humidity}%`);
+    dayCardBody.append(dayHumidity);
+
+    $("#forecast").append(dayCard);
   });
 }
