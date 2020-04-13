@@ -24,10 +24,7 @@ $("#search-city").on("click", function (event) {
     lat = response.coord.lat;
     lon = response.coord.lon;
 
-    //get current date
-    var currentDate = moment().format("L");
-    // render city name, current date and weather icon
-    $(".card-title").text(`${response.name} (${currentDate})`);
+    renderCityName(response);
     var weatherIcon = $("<img>");
     var iconCode = response.weather[0].icon;
     var iconUrl = "http://openweathermap.org/img/wn/" + iconCode + ".png";
@@ -43,16 +40,26 @@ $("#search-city").on("click", function (event) {
   });
 });
 
+function renderCityName(response) {
+  //get current date
+  var currentDate = moment().format("L");
+  // render city name, current date and weather icon
+  $(".card-title").text(`${response.name} (${currentDate})`);
+}
+
 function renderCityList(response, lat, lon) {
   var cityItem = $("<li>");
   cityItem.addClass("list-group-item");
   cityItem.text(response.name);
-  // cityItem.attr("lat", response.coord.lat);
-  // cityItem.attr("lon", response.coord.lon);
+  cityItem.attr("lat", response.coord.lat);
+  cityItem.attr("lon", response.coord.lon);
   $("#city-list").prepend(cityItem);
 
-  console.log(cities);
-
+  // When city item is clicked, re render info and forecast
+  cityItem.on("click", function () {
+    renderCityName(response);
+    renderCityInfo(lat, lon);
+  });
   //render city info after clicking search button
   renderCityInfo(lat, lon);
 }
@@ -101,7 +108,6 @@ function renderCityInfo(lat, lon) {
 
     // render 5-Day Forecast
     renderForecast(response);
-    // $("#forecast") ? renderForecast(response) : $("#forecast").html("");
   });
 }
 
@@ -110,6 +116,7 @@ function renderForecast(response) {
   // Render 5-day forecast
   // var n = 5;
   var days = response.daily;
+  // get the 2nd - 6th index of the daily array of the response
   days.slice(1, 6).map((day) => {
     var dayCard = $("<div>");
     dayCard.addClass("card col daycard");
@@ -125,12 +132,14 @@ function renderForecast(response) {
     var dayCardName = $("<h6>");
     dayCardName.addClass("card-title");
     console.log(day.dt);
+    // take the date of the response object and format it to (MM/DD/YYYY)
     var datestamp = moment.unix(day.dt);
     var forecastDate = datestamp.format("L");
     console.log(forecastDate);
     dayCardName.text(forecastDate);
     dayCardBody.append(dayCardName);
 
+    //take the icon of the response object and set the url to the src of the iconURL
     var weatherIcon = $("<img>");
     var iconCode = day.weather[0].icon;
     var iconUrl = "http://openweathermap.org/img/wn/" + iconCode + ".png";
