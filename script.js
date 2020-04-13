@@ -24,7 +24,6 @@ $("#search-city").on("click", function (event) {
     lat = response.coord.lat;
     lon = response.coord.lon;
 
-    var cityNameElement = $(".card-title");
     //get current date
     var currentDate = moment().format("L");
     // render city name, current date and weather icon
@@ -40,19 +39,23 @@ $("#search-city").on("click", function (event) {
     //store cities in localStorage
     localStorage.setItem("cities", JSON.stringify(cities));
 
-    var cityItem = $("<li>");
-    cityItem.addClass("list-group-item");
-    cityItem.text(response.name);
-    cityItem.attr("lat", response.coord.lat);
-    cityItem.attr("lon", response.coord.lon);
-    $("#city-list").append(cityItem);
-
-    console.log(cities);
-
-    //render city info after clicking search button
-    renderCityInfo(lat, lon);
+    renderCityList(response, lat, lon);
   });
 });
+
+function renderCityList(response, lat, lon) {
+  var cityItem = $("<li>");
+  cityItem.addClass("list-group-item");
+  cityItem.text(response.name);
+  // cityItem.attr("lat", response.coord.lat);
+  // cityItem.attr("lon", response.coord.lon);
+  $("#city-list").prepend(cityItem);
+
+  console.log(cities);
+
+  //render city info after clicking search button
+  renderCityInfo(lat, lon);
+}
 
 // WHEN I view current weather conditions for that city
 function renderCityInfo(lat, lon) {
@@ -103,6 +106,7 @@ function renderCityInfo(lat, lon) {
 }
 
 function renderForecast(response) {
+  $("#forecast").empty();
   // Render 5-day forecast
   // var n = 5;
   var days = response.daily;
