@@ -1,6 +1,20 @@
 // DEPENDENCIES
 var cities = [];
 var APIKey = "a836acbd536c6ec3b05d3d1fcc35d97f";
+var lastCitySearched = "";
+
+var storedCities = JSON.parse(localStorage.getItem("cities"));
+
+for (var i = 0; i < storedCities.length; i++) {
+  lastCitySearched = storedCities.length - 1;
+}
+
+console.log(storedCities);
+console.log(storedCities[lastCitySearched]);
+var lastCity = storedCities[lastCitySearched];
+
+renderLastCityInfo();
+// renderCityList();
 
 // WHEN I search for a city
 // search for a city and store in local storage
@@ -24,16 +38,50 @@ $("#search-city").on("click", function (event) {
     lat = response.coord.lat;
     lon = response.coord.lon;
 
-    renderCityName(response);
-
     // push city input to cities array
     cities.push(city);
     //store cities in localStorage
     localStorage.setItem("cities", JSON.stringify(cities));
 
-    renderCityList(response, lat, lon);
+    var cityItem = $("<li>");
+    cityItem.addClass("list-group-item city-item");
+    cityItem.text(response.name);
+    cityItem.attr("lat", response.coord.lat);
+    cityItem.attr("lon", response.coord.lon);
+    $("#city-list").prepend(cityItem);
+
+    // When city item is clicked, re render info and forecast
+    cityItem.on("click", function () {
+      lat = $(this).attr("lat");
+      lon = $(this).attr("lon");
+      renderCityName(response);
+      renderCityInfo(lat, lon);
+    });
+    renderCityName(response);
+    renderCityInfo(lat, lon);
   });
 });
+
+function renderLastCityInfo() {
+  $("#city-list").clear;
+  var queryURL1 =
+    "https://api.openweathermap.org/data/2.5/weather?q=" +
+    lastCity +
+    "&appid=" +
+    APIKey;
+
+  $.ajax({
+    url: queryURL1,
+    method: "GET",
+  }).then(function (response) {
+    console.log(response);
+    lat = response.coord.lat;
+    lon = response.coord.lon;
+
+    renderCityName(response);
+    renderCityInfo(lat, lon);
+  });
+}
 
 function renderCityName(response) {
   //get current date
@@ -45,24 +93,6 @@ function renderCityName(response) {
   var iconUrl = "http://openweathermap.org/img/wn/" + iconCode + ".png";
   weatherIcon.attr("src", iconUrl);
   $(".card-title").append(weatherIcon);
-  s;
-}
-
-function renderCityList(response, lat, lon) {
-  var cityItem = $("<li>");
-  cityItem.addClass("list-group-item");
-  cityItem.text(response.name);
-  cityItem.attr("lat", response.coord.lat);
-  cityItem.attr("lon", response.coord.lon);
-  $("#city-list").prepend(cityItem);
-
-  // When city item is clicked, re render info and forecast
-  cityItem.on("click", function () {
-    renderCityName(response);
-    renderCityInfo(lat, lon);
-  });
-  //render city info after clicking search button
-  renderCityInfo(lat, lon);
 }
 
 // WHEN I view current weather conditions for that city
@@ -79,7 +109,6 @@ function renderCityInfo(lat, lon) {
     url: queryURL2,
     method: "GET",
   }).then(function (response) {
-    console.log(response);
     // THEN I am presented with the city name, the date, an icon representation of weather conditions, the temperature, the humidity, the wind speed, and the UV index
     $("#temperature").text(`Temperature: ${response.current.temp} \xB0F`);
     $("#humidity").text(`Humidity: ${response.current.humidity}%`);
@@ -132,11 +161,9 @@ function renderForecast(response) {
 
     var dayCardName = $("<h6>");
     dayCardName.addClass("card-title");
-    console.log(day.dt);
     // take the date of the response object and format it to (MM/DD/YYYY)
     var datestamp = moment.unix(day.dt);
     var forecastDate = datestamp.format("L");
-    console.log(forecastDate);
     dayCardName.text(forecastDate);
     dayCardBody.append(dayCardName);
 
