@@ -25,11 +25,6 @@ $("#search-city").on("click", function (event) {
     lon = response.coord.lon;
 
     renderCityName(response);
-    var weatherIcon = $("<img>");
-    var iconCode = response.weather[0].icon;
-    var iconUrl = "http://openweathermap.org/img/wn/" + iconCode + ".png";
-    weatherIcon.attr("src", iconUrl);
-    $(".card-title").append(weatherIcon);
 
     // push city input to cities array
     cities.push(city);
@@ -45,6 +40,12 @@ function renderCityName(response) {
   var currentDate = moment().format("L");
   // render city name, current date and weather icon
   $(".card-title").text(`${response.name} (${currentDate})`);
+  var weatherIcon = $("<img>");
+  var iconCode = response.weather[0].icon;
+  var iconUrl = "http://openweathermap.org/img/wn/" + iconCode + ".png";
+  weatherIcon.attr("src", iconUrl);
+  $(".card-title").append(weatherIcon);
+  s;
 }
 
 function renderCityList(response, lat, lon) {
