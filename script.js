@@ -162,7 +162,7 @@ function renderForecast(response) {
 	// get the 2nd - 6th index of the daily array of the response
 	days.slice(1, 6).map((day) => {
 		var dayCard = $("<div>");
-		dayCard.addClass("card col daycard");
+		dayCard.addClass("card col-md-4 daycard");
 		// dayCard.css("width", "18rem");
 		dayCard.css("background-color", "lightblue");
 		dayCard.css("margin-right", "5px");
